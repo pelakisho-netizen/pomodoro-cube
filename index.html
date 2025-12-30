@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pomodoro Cube</title>
+  <style>
+    body {
+      margin: 0;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: sans-serif;
+    }
+
+    .scene {
+      width: 160px;
+      height: 160px;
+      perspective: 600px;
+    }
+
+    .cube {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: rotate 20s linear infinite;
+    }
+
+    .face {
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      background: #111;
+      border: 2px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .front  { transform: rotateY(  0deg) translateZ(80px); }
+    .back   { transform: rotateY(180deg) translateZ(80px); }
+    .right  { transform: rotateY( 90deg) translateZ(80px); }
+    .left   { transform: rotateY(-90deg) translateZ(80px); }
+    .top    { transform: rotateX( 90deg) translateZ(80px); }
+    .bottom { transform: rotateX(-90deg) translateZ(80px); }
+
+    @keyframes rotate {
+      from { transform: rotateX(0) rotateY(0); }
+      to   { transform: rotateX(360deg) rotateY(360deg); }
+    }
+
+    .controls {
+      position: absolute;
+      bottom: -60px;
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="cube" id="cube">
+      <div class="face front" id="time">25:00</div>
+      <div class="face back">FOCUS</div>
+      <div class="face right">POMO</div>
+      <div class="face left">WORK</div>
+      <div class="face top">⏱</div>
+      <div class="face bottom">REST</div>
+    </div>
+    <div class="controls">
+      <button onclick="start()">Start</button>
+      <button onclick="reset()">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    let duration = 25 * 60;
+    let timer = null;
+
+    function updateDisplay() {
+      const m = String(Math.floor(duration / 60)).padStart(2, '0');
+      const s = String(duration % 60).padStart(2, '0');
+      document.getElementById('time').textContent = `${m}:${s}`;
+    }
+
+    function start() {
+      if (timer) return;
+      timer = setInterval(() => {
+        if (duration > 0) {
+          duration--;
+          updateDisplay();
+        } else {
+          clearInterval(timer);
+          timer = null;
+          alert('Pomodoro Done 🍅');
+        }
+      }, 1000);
+    }
+
+    function reset() {
+      clearInterval(timer);
+      timer = null;
+      duration = 25 * 60;
+      updateDisplay();
+    }
+
+    updateDisplay();
+  </script>
+</body>
+</html>
