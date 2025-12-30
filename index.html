@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pomodoro Cube</title>
+  <title>Pomodoro Cube Minimal</title>
   <style>
     body {
       margin: 0;
@@ -12,12 +12,19 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
-      font-family: sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
     }
 
     .scene {
-      width: 160px;
-      height: 160px;
+      width: 140px;
+      height: 140px;
       perspective: 600px;
     }
 
@@ -26,98 +33,118 @@
       height: 100%;
       position: relative;
       transform-style: preserve-3d;
-      animation: rotate 20s linear infinite;
+      animation: spin 10s linear infinite;
     }
 
     .face {
       position: absolute;
-      width: 160px;
-      height: 160px;
-      background: #111;
-      border: 2px solid #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 28px;
-      font-weight: bold;
+      width: 140px;
+      height: 140px;
+      background: linear-gradient(135deg, #c084fc, #7c3aed);
+      opacity: 0.95;
+      box-shadow: 0 25px 45px rgba(0,0,0,0.35);
     }
 
-    .front  { transform: rotateY(  0deg) translateZ(80px); }
-    .back   { transform: rotateY(180deg) translateZ(80px); }
-    .right  { transform: rotateY( 90deg) translateZ(80px); }
-    .left   { transform: rotateY(-90deg) translateZ(80px); }
-    .top    { transform: rotateX( 90deg) translateZ(80px); }
-    .bottom { transform: rotateX(-90deg) translateZ(80px); }
+    .front  { transform: rotateY(  0deg) translateZ(70px); }
+    .back   { transform: rotateY(180deg) translateZ(70px); }
+    .right  { transform: rotateY( 90deg) translateZ(70px); }
+    .left   { transform: rotateY(-90deg) translateZ(70px); }
+    .top    { transform: rotateX( 90deg) translateZ(70px); }
+    .bottom { transform: rotateX(-90deg) translateZ(70px); }
 
-    @keyframes rotate {
-      from { transform: rotateX(0) rotateY(0); }
-      to   { transform: rotateX(360deg) rotateY(360deg); }
+    @keyframes spin {
+      from { transform: rotateX(18deg) rotateY(0deg); }
+      to   { transform: rotateX(18deg) rotateY(360deg); }
+    }
+
+    .timer {
+      font-size: 32px;
+      font-weight: 600;
+      color: #a855f7;
+      letter-spacing: 1px;
     }
 
     .controls {
-      position: absolute;
-      bottom: -60px;
       display: flex;
-      gap: 10px;
+      gap: 12px;
     }
 
     button {
-      padding: 6px 12px;
-      border-radius: 6px;
-      border: none;
+      background: #1f1f23;
+      color: #e9d5ff;
+      border: 1px solid #3b0764;
+      padding: 6px 14px;
+      border-radius: 999px;
       cursor: pointer;
+      font-size: 12px;
+    }
+
+    button:hover {
+      background: #2e1065;
     }
   </style>
 </head>
 <body>
-  <div class="scene">
-    <div class="cube" id="cube">
-      <div class="face front" id="time">25:00</div>
-      <div class="face back">FOCUS</div>
-      <div class="face right">POMO</div>
-      <div class="face left">WORK</div>
-      <div class="face top">⏱</div>
-      <div class="face bottom">REST</div>
+  <div class="container">
+    <div class="scene">
+      <div class="cube" id="cube">
+        <div class="face front"></div>
+        <div class="face back"></div>
+        <div class="face right"></div>
+        <div class="face left"></div>
+        <div class="face top"></div>
+        <div class="face bottom"></div>
+      </div>
     </div>
+
+    <div class="timer" id="timer">25:00</div>
+
     <div class="controls">
       <button onclick="start()">Start</button>
+      <button onclick="pause()">Pause</button>
       <button onclick="reset()">Reset</button>
     </div>
   </div>
 
   <script>
     let duration = 25 * 60;
-    let timer = null;
+    let interval = null;
+    const timerEl = document.getElementById('timer');
+    const cube = document.getElementById('cube');
 
-    function updateDisplay() {
+    function update() {
       const m = String(Math.floor(duration / 60)).padStart(2, '0');
       const s = String(duration % 60).padStart(2, '0');
-      document.getElementById('time').textContent = `${m}:${s}`;
+      timerEl.textContent = `${m}:${s}`;
     }
 
     function start() {
-      if (timer) return;
-      timer = setInterval(() => {
+      if (interval) return;
+      cube.style.animationPlayState = 'running';
+      interval = setInterval(() => {
         if (duration > 0) {
           duration--;
-          updateDisplay();
+          update();
         } else {
-          clearInterval(timer);
-          timer = null;
-          alert('Pomodoro Done 🍅');
+          pause();
         }
       }, 1000);
     }
 
-    function reset() {
-      clearInterval(timer);
-      timer = null;
-      duration = 25 * 60;
-      updateDisplay();
+    function pause() {
+      clearInterval(interval);
+      interval = null;
+      cube.style.animationPlayState = 'paused';
     }
 
-    updateDisplay();
+    function reset() {
+      pause();
+      duration = 25 * 60;
+      update();
+    }
+
+    cube.style.animationPlayState = 'paused';
+    update();
   </script>
 </body>
 </html>
