@@ -5,16 +5,75 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pomodoro Cube Minimal</title>
   <style>
+    /* تعریف متغیرهای رنگی برای هر دو تم */
+    :root {
+      /* تم تاریک (پیش‌فرض) */
+      --bg-color-dark: transparent;
+      --timer-color-dark: #a855f7;
+      --btn-bg-dark: #1f1f23;
+      --btn-color-dark: #e9d5ff;
+      --btn-border-dark: #3b0764;
+      --btn-hover-bg-dark: #2e1065;
+      --cube-gradient-start-dark: #c084fc;
+      --cube-gradient-end-dark: #7c3aed;
+      --shadow-color-dark: rgba(0, 0, 0, 0.35);
+
+      /* تم روشن */
+      --bg-color-light: #f3f4f6;
+      --timer-color-light: #4f46e5;
+      --btn-bg-light: #ffffff;
+      --btn-color-light: #4338ca;
+      --btn-border-light: #c7d2fe;
+      --btn-hover-bg-light: #eef2ff;
+      --cube-gradient-start-light: #a5b4fc;
+      --cube-gradient-end-light: #6366f1;
+      --shadow-color-light: rgba(0, 0, 0, 0.15);
+    }
+
     body {
       margin: 0;
-      background: transparent;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      transition: background-color 0.3s ease;
     }
 
+    /* استایل‌های حالت تاریک */
+    body.dark {
+      background: var(--bg-color-dark);
+    }
+    body.dark .timer { color: var(--timer-color-dark); }
+    body.dark .face {
+      background: linear-gradient(135deg, var(--cube-gradient-start-dark), var(--cube-gradient-end-dark));
+      box-shadow: 0 25px 45px var(--shadow-color-dark);
+    }
+    body.dark button {
+      background: var(--btn-bg-dark);
+      color: var(--btn-color-dark);
+      border: 1px solid var(--btn-border-dark);
+    }
+    body.dark button:hover { background: var(--btn-hover-bg-dark); }
+
+    /* استایل‌های حالت روشن */
+    body.light {
+      background: var(--bg-color-light);
+    }
+    body.light .timer { color: var(--timer-color-light); }
+    body.light .face {
+      background: linear-gradient(135deg, var(--cube-gradient-start-light), var(--cube-gradient-end-light));
+      box-shadow: 0 25px 45px var(--shadow-color-light);
+    }
+    body.light button {
+      background: var(--btn-bg-light);
+      color: var(--btn-color-light);
+      border: 1px solid var(--btn-border-light);
+    }
+    body.light button:hover { background: var(--btn-hover-bg-light); }
+
+
+    /* استایل‌های مشترک */
     .container {
       display: flex;
       flex-direction: column;
@@ -40,9 +99,7 @@
       position: absolute;
       width: 140px;
       height: 140px;
-      background: linear-gradient(135deg, #c084fc, #7c3aed);
       opacity: 0.95;
-      box-shadow: 0 25px 45px rgba(0,0,0,0.35);
     }
 
     .front  { transform: rotateY(  0deg) translateZ(70px); }
@@ -60,7 +117,6 @@
     .timer {
       font-size: 32px;
       font-weight: 600;
-      color: #a855f7;
       letter-spacing: 1px;
     }
 
@@ -70,21 +126,18 @@
     }
 
     button {
-      background: #1f1f23;
-      color: #e9d5ff;
-      border: 1px solid #3b0764;
       padding: 6px 14px;
       border-radius: 999px;
       cursor: pointer;
       font-size: 12px;
     }
-
-    button:hover {
-      background: #2e1065;
+    
+    #theme-toggle {
+        margin-top: 5px;
     }
   </style>
 </head>
-<body>
+<body id="theme-body" class="dark"> <!-- کلاس پیش‌فرض روی حالت تاریک است -->
   <div class="container">
     <div class="scene">
       <div class="cube" id="cube">
@@ -104,15 +157,18 @@
       <button onclick="pause()">Pause</button>
       <button onclick="reset()">Reset</button>
     </div>
+    
+    <button id="theme-toggle" onclick="toggleTheme()">Light Mode</button>
   </div>
 
   <script>
+    // --- بخش تایمر پومودورو ---
     let duration = 25 * 60;
     let interval = null;
     const timerEl = document.getElementById('timer');
     const cube = document.getElementById('cube');
 
-    function update() {
+    function updateTimerDisplay() {
       const m = String(Math.floor(duration / 60)).padStart(2, '0');
       const s = String(duration % 60).padStart(2, '0');
       timerEl.textContent = `${m}:${s}`;
@@ -124,7 +180,7 @@
       interval = setInterval(() => {
         if (duration > 0) {
           duration--;
-          update();
+          updateTimerDisplay();
         } else {
           pause();
         }
@@ -140,11 +196,46 @@
     function reset() {
       pause();
       duration = 25 * 60;
-      update();
+      updateTimerDisplay();
     }
 
+    // --- بخش مدیریت تم ---
+    const themeBody = document.getElementById('theme-body');
+    const themeToggleBtn = document.getElementById('theme-toggle');
+
+    function toggleTheme() {
+      const isDark = themeBody.classList.contains('dark');
+      
+      if (isDark) {
+        // تغییر به حالت روشن
+        themeBody.classList.remove('dark');
+        themeBody.classList.add('light');
+        themeToggleBtn.textContent = 'Dark Mode';
+        localStorage.setItem('pomodoroTheme', 'light');
+      } else {
+        // تغییر به حالت تاریک
+        themeBody.classList.remove('light');
+        themeBody.classList.add('dark');
+        themeToggleBtn.textContent = 'Light Mode';
+        localStorage.setItem('pomodoroTheme', 'dark');
+      }
+    }
+
+    // بارگذاری تم ذخیره شده هنگام باز شدن صفحه
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('pomodoroTheme');
+      if (savedTheme === 'light') {
+        themeBody.classList.remove('dark');
+        themeBody.classList.add('light');
+        themeToggleBtn.textContent = 'Dark Mode';
+      }
+      // اگر چیزی ذخیره نشده باشد یا dark ذخیره شده باشد، حالت پیش‌فرض (تاریک) باقی می‌ماند
+    }
+
+    // --- اجرای اولیه ---
     cube.style.animationPlayState = 'paused';
-    update();
+    updateTimerDisplay();
+    loadTheme();
   </script>
 </body>
-</html>
+</html>```
